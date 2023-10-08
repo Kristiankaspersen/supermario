@@ -2,6 +2,8 @@
 import pygame
 import sys
 
+from models.objects import Pipe, Platform
+
 pygame.init()
 
 # Constants
@@ -11,7 +13,12 @@ FPS = 60
 # Colors
 WHITE = (255, 255, 255)
 
-win = pygame.display.set_mode((WIDTH, HEIGHT))
+# Pipes and platforms
+pipe1 = Pipe(200, 400, 50, 200)
+pipe2 = Pipe(500, 350, 50, 250)
+platform = Platform( 300, 300, 100, 20)
+
+window = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Super Mario game")
 
 try:
@@ -36,7 +43,6 @@ while running:
             running = False
 
 
-
     keys = pygame.key.get_pressed()
     on_ground = player_rect.bottom >= HEIGHT
 
@@ -48,7 +54,7 @@ while running:
         player_rect.y -= player_speed
     if keys[pygame.K_DOWN] and player_rect.bottom < HEIGHT:
         player_rect.y += player_speed
-    if keys[pygame.K_SPACE] and not jumping and on_ground:
+    if keys[pygame.K_SPACE] and not jumping:
         jumping = True
         player_vel_y = jump_height
 
@@ -60,8 +66,16 @@ while running:
         jumping = False
         player_vel_y = 0
 
-    win.fill(WHITE)
-    win.blit(player_img, player_rect.topleft)
+    if player_rect.colliderect(platform.x, platform.y, platform.width, platform.height):
+        player_rect.y = platform.y - player_rect.height  # Set player on top of the platform
+        jumping = False  # Reset jumping state
+        player_vel_y = 0  # Reset vertical velocity
+
+    window.fill(WHITE)
+    window.blit(player_img, player_rect.topleft)
+    pygame.draw.rect(window, (0, 255, 0), (pipe1.x, pipe1.y, pipe1.width, pipe1.height))
+    pygame.draw.rect(window, (0, 255, 0), (pipe2.x, pipe2.y, pipe2.width, pipe2.height))
+    pygame.draw.rect(window, (139, 69, 19), (platform.x, platform.y, platform.width, platform.height))
 
     pygame.display.flip()
     clock.tick(FPS)
